@@ -17,6 +17,7 @@ import org.apache.log4j.Logger;
 
 import excecutor.ExcecuteJdbc;
 import excecutor.ExcecutorForJdbc;
+import factories.BaceObjectFactory;
 
 public abstract class BaseObjectDao<B extends BaseObject> implements DaoLayer<B> {
 
@@ -26,12 +27,13 @@ public abstract class BaseObjectDao<B extends BaseObject> implements DaoLayer<B>
 	private ExcecutorForJdbc excec = new ExcecutorForJdbc();
 	private Class<B> genericClass;
 	private SqlGenerator<B> sqlGenerator;
-
+	private BaceObjectFactory<B> factory;
 	@SuppressWarnings("unchecked")
 	public BaseObjectDao() {
 		ParameterizedType t = (ParameterizedType) this.getClass().getGenericSuperclass();
-		this.genericClass = (Class<B>) t.getActualTypeArguments()[0];
+		genericClass = (Class<B>) t.getActualTypeArguments()[0];
 		sqlGenerator = new SqlGenerator<B>(genericClass);
+		factory = new BaceObjectFactory<B>(genericClass);
 	}
 
 	@Override
@@ -46,7 +48,7 @@ public abstract class BaseObjectDao<B extends BaseObject> implements DaoLayer<B>
 				stmt.executeQuery();
 				ResultSet resultSet = stmt.getResultSet();
 				resultSet.next();
-				B obj = (B) baceObjectFactory(resultSet);
+				B obj = (B) factory.getObject(resultSet);
 				return obj;
 			}
 
@@ -66,7 +68,7 @@ public abstract class BaseObjectDao<B extends BaseObject> implements DaoLayer<B>
 				ResultSet resultSet = stmt.getResultSet();
 				ArrayList<B> array = new ArrayList<B>();
 				while (resultSet.next()) {
-					array.add((B) baceObjectFactory(resultSet));
+					array.add((B) factory.getObject(resultSet));
 				}
 				return array;
 			}
@@ -165,25 +167,5 @@ public abstract class BaseObjectDao<B extends BaseObject> implements DaoLayer<B>
 				return null;
 			}
 		});
-	}
-
-	protected B baceObjectFactory(ResultSet res) throws SQLException {
-		ParameterizedType t = (ParameterizedType) this.getClass().getGenericSuperclass();
-		@SuppressWarnings("unchecked")
-		Class<B> genericClass = (Class<B>) t.getActualTypeArguments()[0];
-		B obj = null;
-		try {
-			obj = genericClass.newInstance();
-			for (Field f : obj.getClass().getDeclaredFields()) {
-				// так делать плохо... но пока оставлю
-				f.setAccessible(true);
-				f.set(obj, res.getObject(f.getAnnotation(javax.persistence.Column.class).name()));
-			}
-		} catch (InstantiationException e) {
-			e.printStackTrace();
-		} catch (IllegalAccessException e) {
-			e.printStackTrace();
-		}
-		return obj;
 	}
 }
