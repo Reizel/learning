@@ -9,8 +9,15 @@ public class DBConnection {
 	private String url = "jdbc:postgresql://localhost:5432/my_db";
 	private String userName = "postgres";
 	private String password = "111111";
+	private static DBConnection instance = null;
 
-	public DBConnection(int poolQuantity) {
+	public static DBConnection getInstance() {
+		if (instance == null)
+			instance = new DBConnection(3);
+		return instance;
+	}
+
+	private DBConnection(int poolQuantity) {
 		try {
 			Class.forName("org.postgresql.Driver");
 		} catch (ClassNotFoundException e) {

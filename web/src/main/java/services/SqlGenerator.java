@@ -15,7 +15,7 @@ public class SqlGenerator<B extends BaseObject> {
 		this.genericClass = genericClass;
 		tableName = genericClass.getAnnotation(javax.persistence.Table.class).name();
 		for (Field f : genericClass.getDeclaredFields()) {
-			if((f.getAnnotation(javax.persistence.Column.class)) != null){
+			if ((f.getAnnotation(javax.persistence.Column.class)) != null) {
 				String annotName = f.getAnnotation(javax.persistence.Column.class).name();
 				columnNames.add(annotName);
 			}

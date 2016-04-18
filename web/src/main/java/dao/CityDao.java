@@ -5,10 +5,11 @@ import model.City;
 public class CityDao extends BaseObjectDao<City> {
 
 	private static CityDao instance = null;
-	
-	private CityDao(){
-		
+
+	private CityDao() {
+
 	}
+
 	public static CityDao getInstance() {
 		if (instance == null) {
 			instance = new CityDao();

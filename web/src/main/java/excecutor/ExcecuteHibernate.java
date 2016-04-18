@@ -1,8 +1,8 @@
-package dao;
+package excecutor;
 
 import org.hibernate.Session;
 
 @FunctionalInterface
 public interface ExcecuteHibernate {
-	public  <T>T  handle(Session session);
+	public <T> T handle(Session session);
 }

@@ -1,6 +1,5 @@
 package dao;
 
-import java.sql.Statement;
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
 import java.sql.PreparedStatement;
@@ -16,12 +15,15 @@ import model.BaseObject;
 
 import org.apache.log4j.Logger;
 
+import excecutor.ExcecuteJdbc;
+import excecutor.ExcecutorForJdbc;
+
 public abstract class BaseObjectDao<B extends BaseObject> implements DaoLayer<B> {
 
 	public static final Logger logger = Logger.getLogger(BaseObjectDao.class);
 
-	private DBConnection connectionPool = new DBConnection(3);
-
+	private DBConnection connectionPool = DBConnection.getInstance();
+	private ExcecutorForJdbc excec = new ExcecutorForJdbc();
 	private Class<B> genericClass;
 	private SqlGenerator<B> sqlGenerator;
 
@@ -36,15 +38,18 @@ public abstract class BaseObjectDao<B extends BaseObject> implements DaoLayer<B>
 	public B get(int id) {
 		logger.info("Получение обьекта из базы");
 		String sql = sqlGenerator.generateSelectBuId(id);
-		return ExcecuteQuary(sql, new ExcecuteQuaryHandler() {
+		return excec.excecute(sql, new ExcecuteJdbc() {
+
 			@SuppressWarnings("unchecked")
 			@Override
-			public B handle(ResultSet resultSet) throws SQLException {
-				B obj = null;
+			public B handle(PreparedStatement stmt) throws SQLException {
+				stmt.executeQuery();
+				ResultSet resultSet = stmt.getResultSet();
 				resultSet.next();
-				obj = (B) baceObjectFactory(resultSet);
+				B obj = (B) baceObjectFactory(resultSet);
 				return obj;
 			}
+
 		});
 	}
 
@@ -52,10 +57,13 @@ public abstract class BaseObjectDao<B extends BaseObject> implements DaoLayer<B>
 	public ArrayList<B> getList() {
 		logger.info("Получение обьектов из базы");
 		String sql = sqlGenerator.generateSelect();
-		return ExcecuteQuary(sql, new ExcecuteQuaryHandler() {
+		return excec.excecute(sql, new ExcecuteJdbc() {
+
 			@SuppressWarnings("unchecked")
 			@Override
-			public ArrayList<B> handle(ResultSet resultSet) throws SQLException {
+			public ArrayList<B> handle(PreparedStatement stmt) throws SQLException {
+				stmt.executeQuery();
+				ResultSet resultSet = stmt.getResultSet();
 				ArrayList<B> array = new ArrayList<B>();
 				while (resultSet.next()) {
 					array.add((B) baceObjectFactory(resultSet));
@@ -118,9 +126,9 @@ public abstract class BaseObjectDao<B extends BaseObject> implements DaoLayer<B>
 	public void update(B obj) {
 		logger.info("обновление обьекта в базе");
 		String sql = sqlGenerator.generateUpdate();
-		ExcecuteUpdate(sql, new ExcecuteUpdateHandler() {
+		excec.excecute(sql, new ExcecuteJdbc() {
 			@Override
-			public void handle(PreparedStatement stmt) throws SQLException {
+			public <T> T handle(PreparedStatement stmt) throws SQLException {
 				int i = 1;
 				for (Field f : obj.getClass().getDeclaredFields()) {
 					if (f.getAnnotation(javax.persistence.Id.class) != null) {
@@ -138,7 +146,10 @@ public abstract class BaseObjectDao<B extends BaseObject> implements DaoLayer<B>
 					i++;
 				}
 				stmt.setInt(i, obj.getId());
+				stmt.executeUpdate(sql);
+				return null;
 			}
+
 		});
 	}
 
@@ -146,10 +157,12 @@ public abstract class BaseObjectDao<B extends BaseObject> implements DaoLayer<B>
 	public void delete(B obj) {
 		logger.info("удаление обьекта из базы");
 		String sql = sqlGenerator.generateDelete();
-		ExcecuteUpdate(sql, new ExcecuteUpdateHandler() {
+		excec.excecute(sql, new ExcecuteJdbc() {
 			@Override
-			public void handle(PreparedStatement stmt) throws SQLException {
+			public <T> T handle(PreparedStatement stmt) throws SQLException {
 				stmt.setInt(1, obj.getId());
+				stmt.executeUpdate(sql);
+				return null;
 			}
 		});
 	}
@@ -172,55 +185,5 @@ public abstract class BaseObjectDao<B extends BaseObject> implements DaoLayer<B>
 			e.printStackTrace();
 		}
 		return obj;
-	}
-
-	private <T> T ExcecuteQuary(String sql, ExcecuteQuaryHandler handler) {
-		ConnectionItem connection = null;
-		ResultSet result = null;
-		Statement st = null;
-		try {
-			connection = connectionPool.getConnectionItem();
-			st = connection.getConn().createStatement();
-			st.executeQuery(sql);
-			result = st.getResultSet();
-			return handler.handle(result);
-		} catch (SQLException e) {
-			logger.warn(e);
-		} finally {
-			try {
-				if (result != null)
-					result.close();
-				if (st != null)
-					st.close();
-				if (connection != null)
-					connectionPool.close(connection);
-			} catch (SQLException e) {
-				logger.warn(e);
-			}
-		}
-		return null;
-	}
-
-	private <T> T ExcecuteUpdate(String sql, ExcecuteUpdateHandler handler) {
-		ConnectionItem connection = null;
-		PreparedStatement st = null;
-		try {
-			connection = connectionPool.getConnectionItem();
-			st = connection.getConn().prepareStatement(sql);
-			handler.handle(st);
-			st.executeUpdate(sql);
-		} catch (SQLException e) {
-			logger.warn(e);
-		} finally {
-			try {
-				if (st != null)
-					st.close();
-				if (connection != null)
-					connectionPool.close(connection);
-			} catch (SQLException e) {
-				logger.warn(e);
-			}
-		}
-		return null;
 	}
 }

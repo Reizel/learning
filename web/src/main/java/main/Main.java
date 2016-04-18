@@ -11,20 +11,18 @@ import dao.DaoLayer;
 import model.BaseObject;
 import model.City;
 
-
 public class Main {
 
 	public static final Logger logger = Logger.getLogger(Main.class);
 
 	public static void main(String[] args) {
 		logger.info("programm started!");
-		
-	
+
 		@SuppressWarnings("resource")
 		ApplicationContext actx = new ClassPathXmlApplicationContext("bean.xml");
 		@SuppressWarnings("unchecked")
-		DaoLayer<City> citydao = (DaoLayer<City>) actx.getBean("citydao");				
-	
+		DaoLayer<City> citydao = (DaoLayer<City>) actx.getBean("citydao");
+
 		ArrayList<City> arr = (ArrayList<City>) citydao.getList();
 		for (BaseObject obj : arr) {
 			System.out.println(obj);
