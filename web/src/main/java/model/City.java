@@ -20,7 +20,7 @@ public class City implements BaseObject {
 	private String name;
 
 	public City() {
-
+		
 	}
 
 	public City(String name) {

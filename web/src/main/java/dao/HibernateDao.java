@@ -14,71 +14,78 @@ import model.BaseObject;
 public abstract  class HibernateDao<B extends BaseObject> implements DaoLayer<B>{
 	
 	private static SessionFactory sessionFactory  = new Configuration().configure().buildSessionFactory();
-	
+	private ParameterizedType genericType = (ParameterizedType) this.getClass().getGenericSuperclass();
 	@Override
 	public B get(int id) {
-		final Session session = sessionFactory.openSession();
-		Transaction tx = session.beginTransaction();
-		ParameterizedType t = (ParameterizedType) this.getClass().getGenericSuperclass();
 		@SuppressWarnings("unchecked")
-		Class<B> genericClass = (Class<B>) t.getActualTypeArguments()[0];
-		try {
-			return  (B) session.get(genericClass, id);
+		Class<B> genericClass = (Class<B>) genericType.getActualTypeArguments()[0];
+		return excecute(new ExcecuteHibernate(){
+			@SuppressWarnings("unchecked")
+			@Override
+			public B handle(Session session) {
+				return session.get(genericClass, id);
+			}
 			
-		} finally {
-			tx.commit();
-			session.close();
-		}
+		});
 	}
 
 	@SuppressWarnings("unchecked")
 	@Override
 	public List<B> getList() {
-		final Session session = sessionFactory.openSession();
-		Transaction tx = session.beginTransaction();
-		ParameterizedType t = (ParameterizedType) this.getClass().getGenericSuperclass();
-		Class<B> genericClass = (Class<B>) t.getActualTypeArguments()[0];
-		try {
-			return session.createQuery("from "+ genericClass.getCanonicalName()).list();
-		} finally {
-			tx.commit();
-			session.close();
-		}
+		Class<B> genericClass = (Class<B>) genericType.getActualTypeArguments()[0];
+		return excecute(new ExcecuteHibernate(){
+			@Override
+			public List<B> handle(Session session) {
+				return  session.createQuery("from "+ genericClass.getCanonicalName()).list();
+			}
+		});
 	}
 
 	@Override
 	public void add(B obj) {
-		final Session session = sessionFactory.openSession();
-		Transaction tx = session.beginTransaction();
-		try {
-			session.save(obj);
-		} finally {
-			tx.commit();
-			session.close();
-		}	
+		excecute(new ExcecuteHibernate(){
+			@SuppressWarnings("unchecked")
+			@Override
+			public Object handle(Session session) {
+				 session.save(obj);
+				 return null;
+			}
+		});
 	}
 
 	@Override
 	public void delete(B obj) {
-		final Session session = sessionFactory.openSession();
-		Transaction tx = session.beginTransaction();
-		try {
-			session.delete(obj);
-		} finally {
-			tx.commit();
-			session.close();
-		}
+		excecute(new ExcecuteHibernate(){
+			@SuppressWarnings("unchecked")
+			@Override
+			public Object handle(Session session) {
+				session.delete(obj);
+				return null;
+			}
+		});
 	}
 
 	@Override
 	public void update(B obj) {
-		final Session session = sessionFactory.openSession();
+		excecute(new ExcecuteHibernate(){
+			@SuppressWarnings("unchecked")
+			@Override
+			public Object handle(Session session) {
+				session.update(obj);
+				return null;
+			}
+		});
+	}
+	
+	private <T>T excecute(ExcecuteHibernate handler){
+		Session session =sessionFactory.openSession();
 		Transaction tx = session.beginTransaction();
-		try {
-			session.update(obj);
-		} finally {
+		try{
+			handler.handle(session);
+		}finally{
 			tx.commit();
 			session.close();
 		}
+		return null;
 	}
 }
