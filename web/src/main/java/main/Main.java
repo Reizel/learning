@@ -24,6 +24,7 @@ public class Main {
 		DaoLayer<City> citydao = (DaoLayer<City>) actx.getBean("citydao");
 
 		ArrayList<City> arr = (ArrayList<City>) citydao.getList();
+		logger.info(arr);
 		for (BaseObject obj : arr) {
 			System.out.println(obj);
 		}
