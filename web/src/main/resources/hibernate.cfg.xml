@@ -6,8 +6,8 @@
 <!--         <property name="hibernate.connection.url">jdbc:postgresql://localhost:5432/my_db</property> -->
 <!--         <property name="hibernate.connection.username">postgres</property> -->
 <!--         <property name="connection.password">111111</property> -->
-        <property name="hibernate.dialect">org.hibernate.dialect.PostgreSQLDialect</property>
-        <property name="hibernate.show_sql">true</property>
+<!--         <property name="hibernate.dialect">org.hibernate.dialect.PostgreSQLDialect</property> -->
+<!--         <property name="hibernate.show_sql">true</property> -->
 		
         <mapping class="model.User"/>
         <mapping class="model.City"/>

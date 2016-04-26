@@ -2,6 +2,7 @@
 <beans xmlns="http://www.springframework.org/schema/beans"
 	xmlns:aop="http://www.springframework.org/schema/aop" 
 	xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:context="http://www.springframework.org/schema/context"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://www.springframework.org/schema/beans
 	http://www.springframework.org/schema/beans/spring-beans.xsd
@@ -9,26 +10,19 @@
 	http://www.springframework.org/schema/tx/spring-tx.xsd
 	http://www.springframework.org/schema/aop
 	http://www.springframework.org/schema/aop/spring-aop.xsd
+	http://www.springframework.org/schema/context 
+	http://www.springframework.org/schema/context/spring-context-3.0.xsd
 ">
-
-
-	
-	<bean id="hibernateDao" class="dao.HibernateDao" abstract="true">
-		<property name="sessionFactory" ref="sessionFactory" />
-	</bean>
-
-	<bean id="userdao" class="dao.HibernateUser" factory-method="getInstance"
-		parent="hibernateDao" />
-	<bean id="citydao" class="dao.HibernateCity" factory-method="getInstance"
-		parent="hibernateDao" />
+	<context:property-placeholder location="classpath:/db.properties" />
+	<context:component-scan base-package="dao" />
 
 
 	<bean name="dataSource"
 		class="org.springframework.jdbc.datasource.DriverManagerDataSource">
-		<property name="driverClassName" value="org.postgresql.Driver" />
-		<property name="url" value="jdbc:postgresql://localhost:5432/my_db" />
-		<property name="username" value="postgres" />
-		<property name="password" value="111111" />
+		<property name="driverClassName" value="${driverClassName}" />
+		<property name="url" value="${url}" />
+		<property name="username" value="${username}" />
+		<property name="password" value="${password}" />
 	</bean>
 
 	<bean id="sessionFactory"
@@ -36,8 +30,9 @@
 		<property name="dataSource" ref="dataSource" />
 		<property name="configLocation" value="classpath:/hibernate.cfg.xml" />
 	</bean>
+
 	<tx:annotation-driven />
-	
+
 	<bean id="transactionManager"
 		class="org.springframework.orm.hibernate5.HibernateTransactionManager">
 		<property name="sessionFactory" ref="sessionFactory" />

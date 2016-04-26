@@ -3,14 +3,21 @@ package dao;
 import java.lang.reflect.ParameterizedType;
 import java.util.List;
 
+
+
 import org.hibernate.SessionFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
 import model.BaseObject;
 
+
 public class HibernateDao<B extends BaseObject> implements DaoLayer<B> {
 
+
+	@Autowired
 	private SessionFactory sessionFactory;
+	
 	private ParameterizedType genericType = (ParameterizedType) this.getClass().getGenericSuperclass();
 	@SuppressWarnings("unchecked")
 	private Class<B> genericClass = (Class<B>) genericType.getActualTypeArguments()[0];
@@ -57,5 +64,4 @@ public class HibernateDao<B extends BaseObject> implements DaoLayer<B> {
 	public void setSessionFactory(SessionFactory sessionFactory) {
 		this.sessionFactory = sessionFactory;
 	}
-
 }

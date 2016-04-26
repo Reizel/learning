@@ -23,7 +23,7 @@ public class Main {
 		ApplicationContext actx = new ClassPathXmlApplicationContext("bean.xml");
 		
 		@SuppressWarnings("unchecked")
-		DaoLayer<City> citydao = (DaoLayer<City>) actx.getBean("citydao");
+		DaoLayer<City> citydao = (DaoLayer<City>) actx.getBean("hibernateCity");
 
 		ArrayList<City> arr = (ArrayList<City>) citydao.getList();
 		logger.info(arr);
@@ -31,7 +31,8 @@ public class Main {
 			System.out.println(obj);
 		}
 		@SuppressWarnings("unchecked")
-		DaoLayer<User> userdao = (DaoLayer<User>) actx.getBean("userdao");
+		DaoLayer<User> userdao = (DaoLayer<User>) actx.getBean("hibernateUser");
+
 //		User usr = new User();
 //		usr.setName("John");
 //		usr.setSurname("Smith");
