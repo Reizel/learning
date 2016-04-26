@@ -71,6 +71,12 @@ public class User implements BaseObject {
 		this.age = age;
 	}
 
+	@Override
+	public String toString() {
+		return "User [id=" + id + ", name=" + name + ", surname=" + surname + ", age=" + age + ", addres=" + addres
+				+ ", salary=" + salary + ", city=" + city + "]";
+	}
+
 	public String getAddres() {
 		return addres;
 	}

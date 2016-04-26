@@ -10,6 +10,7 @@ import dao.DaoLayer;
 
 import model.BaseObject;
 import model.City;
+import model.User;
 
 public class Main {
 
@@ -20,6 +21,7 @@ public class Main {
 
 		@SuppressWarnings("resource")
 		ApplicationContext actx = new ClassPathXmlApplicationContext("bean.xml");
+		
 		@SuppressWarnings("unchecked")
 		DaoLayer<City> citydao = (DaoLayer<City>) actx.getBean("citydao");
 
@@ -28,5 +30,20 @@ public class Main {
 		for (BaseObject obj : arr) {
 			System.out.println(obj);
 		}
+		@SuppressWarnings("unchecked")
+		DaoLayer<User> userdao = (DaoLayer<User>) actx.getBean("userdao");
+//		User usr = new User();
+//		usr.setName("John");
+//		usr.setSurname("Smith");
+//		usr.setAge(25);
+//		usr.setAddres("Zalesskaya street");
+//		usr.setSalary(100000);
+//		usr.setCity(citydao.get(0));
+//		userdao.add(usr);
+		ArrayList<User> users = (ArrayList<User>)userdao.getList();
+		for (BaseObject obj : users) {
+			System.out.println(obj);
+		}
+		
 	}
 }

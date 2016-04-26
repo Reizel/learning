@@ -2,9 +2,11 @@ package dao;
 
 import java.util.List;
 
+
 import model.BaseObject;
 
 public interface DaoLayer<B extends BaseObject> {
+
 	public B get(int id);
 
 	public List<B> getList();
